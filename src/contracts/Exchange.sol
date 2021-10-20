@@ -13,6 +13,7 @@ contract Exchange {
     mapping(address => mapping(address => uint256)) public tokens;
 
     event Deposit(address token, address user, uint256 amount, uint256 balance);
+    event Withdraw(address token, address user, uint256 amount, uint256 balance);
 
     constructor (address _feeAccount, uint256 _feePercent) public {
         feeAccount = _feeAccount;
