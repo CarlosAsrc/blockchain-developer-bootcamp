@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract Token {
-    using SafeMath for uint;
+    using SafeMath for uint256;
 
     string public name = "Carlos Token";
     string public symbol = "ASRC";

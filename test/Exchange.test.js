@@ -205,9 +205,43 @@ contract('Exchange', ([deployer, feeAccount, user1]) => {
             await exchange.depositEther({ from: user1, value: amount })
         })
 
-        it('tracks the balance', async () => { 
+        it('tracks the balance', async () => {
             const balance = await exchange.balanceOf(ETHER_ADDRESS, user1)
             balance.toString().should.equal(amount.toString())
+        })
+    })
+
+    describe('making orders', () => {
+        let result
+
+        beforeEach(async () => {
+            result = await exchange.makeOrder(token.address, tokens(1), ETHER_ADDRESS, ether(1), { from: user1 })
+        })
+
+        it('tracks the order creation', async () => {
+            let orderCount = await exchange.orderCount()
+            orderCount.toString().should.equal('1')
+            const order = await exchange.orders('1')
+            order.id.toString().should.equal('1')
+            order.user.should.equal(user1)
+            order.tokenGet.should.equal(token.address)
+            order.amountGet.toString().should.equal(tokens(1).toString())
+            order.tokenGive.should.equal(ETHER_ADDRESS)
+            order.amountGive.toString().should.equal(ether(1).toString())
+            order.timestamp.toString().length.should.be.at.least(1)
+        })
+
+        it('emits an "Order" event', async () => {
+            const log = result.logs[0]
+            log.event.should.eq('Order')
+            const event = log.args
+            event.id.toString().should.equal('1')
+            event.user.should.equal(user1)
+            event.tokenGet.should.equal(token.address)
+            event.amountGet.toString().should.equal(tokens(1).toString())
+            event.tokenGive.should.equal(ETHER_ADDRESS)
+            event.amountGive.toString().should.equal(ether(1).toString())
+            event.timestamp.toString().length.should.be.at.least(1)
         })
     })
 })
