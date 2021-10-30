@@ -10,7 +10,7 @@ require('chai')
     .should()
 
 
-contract('Exchange', ([deployer, feeAccount, user1]) => {
+contract('Exchange', ([deployer, feeAccount, user1, user2]) => {
 
     let token
     let exchange
@@ -211,7 +211,7 @@ contract('Exchange', ([deployer, feeAccount, user1]) => {
         })
     })
 
-    describe('making orders', () => {
+    describe('making orders', async () => {
         let result
 
         beforeEach(async () => {
@@ -243,5 +243,53 @@ contract('Exchange', ([deployer, feeAccount, user1]) => {
             event.amountGive.toString().should.equal(ether(1).toString())
             event.timestamp.toString().length.should.be.at.least(1)
         })
+    })
+
+    describe('orders actions', async () => {
+
+        beforeEach(async () => {
+            await exchange.depositEther({ from: user1, value: ether(1) })
+            await exchange.makeOrder(token.address, tokens(1), ETHER_ADDRESS, ether(1), { from: user1 })
+        })
+
+        describe('cancelling orders', async () => {
+            let result
+
+            describe('success', async () => {
+                beforeEach(async () => {
+                    result = await exchange.cancelOrder('1', { from: user1 })
+                })
+
+                it('updates cancelled orders', async () => {
+                    const orderCancelled = await exchange.orderCancelled('1')
+                    orderCancelled.should.equal(true)
+                })
+
+                it('emits an "Cancel" event', async () => {
+                    const log = result.logs[0]
+                    log.event.should.eq('Cancel')
+                    const event = log.args
+                    event.id.toString().should.equal('1')
+                    event.user.should.equal(user1)
+                    event.tokenGet.should.equal(token.address)
+                    event.amountGet.toString().should.equal(tokens(1).toString())
+                    event.tokenGive.should.equal(ETHER_ADDRESS)
+                    event.amountGive.toString().should.equal(ether(1).toString())
+                    event.timestamp.toString().length.should.be.at.least(1)
+                })
+            })
+
+            describe('failure', async () => {
+                it('rejects invalid order ids', async () => {
+                    const invalidId = 9999
+                    await exchange.cancelOrder(invalidId, { from: user1 }).should.be.rejectedWith(EVM_REVERT)
+                })
+
+                it('rejects unauthorized cancelations', async () => {
+                    await exchange.cancelOrder('1', { from: user2 }).should.be.rejectedWith(EVM_REVERT)
+                })
+            })
+        })
+
     })
 })
