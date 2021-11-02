@@ -51,7 +51,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
         let amount
         let result
 
-        describe('success', async () => {
+        describe('success', () => {
             beforeEach(async () => {
                 amount = tokens(100)
                 result = await token.transfer(receiver, amount, { from: deployer })
@@ -65,7 +65,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
                 balanceOf.toString().should.equal(tokens(100).toString())
             })
 
-            it('emits a Transfer event', async () => {
+            it('emits a Transfer event', () => {
                 const args = result.logs[0].args
                 const event = result.logs[0].event
 
@@ -78,7 +78,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
         })
 
 
-        describe('failure', async () => {
+        describe('failure', () => {
             it('rejects insufficient balances', async () => {
                 let invalidAmount = tokens(10000000)
                 await token.transfer(receiver, invalidAmount, { from: deployer }).should.be.rejectedWith(EVM_REVERT)
@@ -87,8 +87,8 @@ contract('Token', ([deployer, receiver, exchange]) => {
                 await token.transfer(deployer, invalidAmount, { from: receiver }).should.be.rejectedWith(EVM_REVERT)
             })
 
-            it('rejects invalid recipients', async () => {
-                await token.transfer('0x0', amount, { from: deployer }).should.be.rejected
+            it('rejects invalid recipients', () => {
+                token.transfer('0x0', amount, { from: deployer }).should.be.rejected
             })
         })
     })
@@ -108,7 +108,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
                 allowance.toString().should.equal(amount.toString())
             })
 
-            it('emits a Approval event', async () => {
+            it('emits a Approval event', () => {
                 const args = result.logs[0].args
                 const event = result.logs[0].event
 
@@ -121,8 +121,8 @@ contract('Token', ([deployer, receiver, exchange]) => {
         })
 
         describe('failure', () => {
-            it('rejects invalid spenders', async () => {
-                await token.approve(0x0, amount, { from: deployer }).should.be.rejected
+            it('rejects invalid spenders', () => {
+                token.approve(0x0, amount, { from: deployer }).should.be.rejected
             })
         })
     })
@@ -137,7 +137,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
             await token.approve(exchange, amount, { from: deployer })
         })
 
-        describe('success', async () => {
+        describe('success', () => {
             beforeEach(async () => {
                 result = await token.transferFrom(deployer, receiver, amount, { from: exchange })
             })
@@ -155,7 +155,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
                 allowance.toString().should.equal('0')
             })
 
-            it('emits a Transfer event', async () => {
+            it('emits a Transfer event', () => {
                 const args = result.logs[0].args
                 const event = result.logs[0].event
 
@@ -168,14 +168,14 @@ contract('Token', ([deployer, receiver, exchange]) => {
         })
 
 
-        describe('failure', async () => {
-            it('rejects insufficient amounts', async () => {
+        describe('failure', () => {
+            it('rejects insufficient amounts', () => {
                 let invalidAmount = tokens(10000000)
-                await token.transferFrom(deployer, receiver, invalidAmount, { from: exchange }).should.be.rejectedWith(EVM_REVERT)
+                token.transferFrom(deployer, receiver, invalidAmount, { from: exchange }).should.be.rejectedWith(EVM_REVERT)
             })
 
-            it('rejects invalid recipients', async () => {
-                await token.transferFrom(deployer, '0x0', amount, { from: exchange }).should.be.rejected
+            it('rejects invalid recipients', () => {
+                token.transferFrom(deployer, '0x0', amount, { from: exchange }).should.be.rejected
             })
         })
     })
